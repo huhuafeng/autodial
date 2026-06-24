@@ -1,8 +1,10 @@
 package com.junhuayunhu.call
 
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
 
@@ -37,12 +39,26 @@ class CallHandler(private val context: Context) {
         currentCallSession = callSession
         callStartTime = 0
         callAnswered = false
-        val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phone")).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        val telecom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && telecom != null) {
+            // TelecomManager.placeCall() works from background Service (API 29+)
+            val extras = Bundle().apply {
+                putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false)
+            }
+            telecom.placeCall(Uri.fromParts("tel", phone, null), extras)
+        } else {
+            // fallback for older devices
+            val intent = android.content.Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:$phone")).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
         }
-        context.startActivity(intent)
+
         telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
     }
+
+    fun isBackgroundDialSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     fun getCallSession(): String? = currentCallSession
 

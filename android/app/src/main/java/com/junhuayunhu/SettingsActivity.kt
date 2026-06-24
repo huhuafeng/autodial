@@ -69,10 +69,17 @@ class SettingsActivity : AppCompatActivity() {
             else -> "❌ 未授权"
         }
 
+        fun checkManageCalls(): String {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return "✅ 无需授权"
+            val telecom = getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+            return if (telecom.isInCall) "⚠️ 请查看设置" else "❌ 未授权"
+        }
+
         findViewById<TextView>(R.id.tv_perm_phone).text = "拨打电话：${check(Manifest.permission.CALL_PHONE)}"
         findViewById<TextView>(R.id.tv_perm_state).text = "通话状态：${check(Manifest.permission.READ_PHONE_STATE)}"
         findViewById<TextView>(R.id.tv_perm_audio).text = "录音：${check(Manifest.permission.RECORD_AUDIO)}"
         findViewById<TextView>(R.id.tv_perm_notification).text = "通知：${check(Manifest.permission.POST_NOTIFICATIONS)}"
+        findViewById<TextView>(R.id.tv_perm_manage_calls).text = "后台拨号：${checkManageCalls()}"
 
         val storageOk = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             Environment.isExternalStorageManager() else

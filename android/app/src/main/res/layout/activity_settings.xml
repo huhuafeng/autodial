@@ -149,7 +149,8 @@
         <TextView android:id="@+id/tv_perm_audio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
         <TextView android:id="@+id/tv_perm_notification" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
         <TextView android:id="@+id/tv_perm_storage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
-        <TextView android:id="@+id/tv_perm_battery" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="12dp" />
+        <TextView android:id="@+id/tv_perm_battery" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_manage_calls" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="12dp" />
 
         <Button
             android:id="@+id/btn_fix_permissions"
