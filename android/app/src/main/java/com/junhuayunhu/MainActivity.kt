@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<android.widget.Button>(R.id.btn_stats)?.setOnClickListener {
-            startActivity(Intent(this, ui.StatsActivity::class.java))
+            startActivity(Intent(this, com.junhuayunhu.ui.StatsActivity::class.java))
         }
 
         checkPermissions()

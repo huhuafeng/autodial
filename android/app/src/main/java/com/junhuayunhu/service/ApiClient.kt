@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.junhuayunhu.model.*
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -30,7 +32,7 @@ class ApiClient(private val baseUrl: String) {
 
     fun syncRecords(records: List<CallRecord>, onResult: (SyncResult?) -> Unit) {
         val json = gson.toJson(records)
-        val body = RequestBody.create(MediaType.parse("application/json"), json)
+        val body = json.toRequestBody("application/json".toMediaType())
         val request = Request.Builder().url("$baseUrl/api/records/sync").post(body).build()
         client.newCall(request).enqueue(callback { resp ->
             val result = resp?.let { gson.fromJson(it, SyncResult::class.java) }

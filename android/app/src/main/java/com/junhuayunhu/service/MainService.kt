@@ -15,7 +15,6 @@ import com.junhuayunhu.model.CallRecord
 import com.junhuayunhu.service.ApiClient
 import com.junhuayunhu.utils.ConfigManager
 import com.junhuayunhu.utils.FileLogger
-import com.junhuayunhu.utils.FileLogger
 
 class MainService : Service() {
 
