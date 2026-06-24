@@ -20,13 +20,14 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var config: ConfigManager
 
-    private val requiredPermissions = mutableListOf(
+    private var requiredPermissions = listOf(
         Manifest.permission.CALL_PHONE,
         Manifest.permission.READ_PHONE_STATE,
         Manifest.permission.PROCESS_OUTGOING_CALLS,
         Manifest.permission.READ_CALL_LOG,
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.POST_NOTIFICATIONS,
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
     )
 
     private val permissionLauncher = registerForActivityResult(
