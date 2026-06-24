@@ -73,10 +73,10 @@ class MainService : Service() {
                 TelephonyManager.CALL_STATE_IDLE -> {
                     callHandler.getCallSession()?.let { session ->
                         sendWsStatus("ended", phone)
-                        recordingMonitor.waitForRecording(phone ?: "") { path ->
-                            logger.i("MainSvc", "recording result: $path")
-                            if (path != null) {
-                                uploadManager.upload(path, session) { ok, msg ->
+                    recordingMonitor.waitForRecording(phone ?: "", session) { path ->
+                        logger.i("MainSvc", "recording result: $path")
+                        if (path != null) {
+                            uploadManager.upload(path, session, phone ?: "") { ok, msg ->
                                     logger.i("MainSvc", "upload result: ok=$ok msg=$msg")
                                     if (ok) {
                                         wsManager.send(toJson(mapOf(

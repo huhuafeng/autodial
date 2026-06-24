@@ -15,11 +15,11 @@ class UploadManager(private val context: Context) {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
         .build()
 
-    fun upload(filePath: String, callSession: String, onResult: (Boolean, String?) -> Unit) {
+    fun upload(filePath: String, callSession: String, phone: String = "", onResult: (Boolean, String?) -> Unit) {
         val file = File(filePath)
         if (!file.exists()) {
             onResult(false, "file not found")
@@ -33,6 +33,7 @@ class UploadManager(private val context: Context) {
             .setType(MultipartBody.FORM)
             .addFormDataPart("file", file.name, fileBody)
             .addFormDataPart("callSession", callSession)
+            .addFormDataPart("phone", phone)
             .build()
 
         val request = Request.Builder()
