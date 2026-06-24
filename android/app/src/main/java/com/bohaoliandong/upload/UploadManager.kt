@@ -1,0 +1,49 @@
+package com.bohaoliandong.upload
+
+import android.content.Context
+import com.bohaoliandong.BuildConfig
+import okhttp3.*
+import java.io.File
+import java.io.IOException
+import java.util.concurrent.TimeUnit
+
+class UploadManager(private val context: Context) {
+
+    var uploadUrl: String = BuildConfig.UPLOAD_URL
+
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .build()
+
+    fun upload(filePath: String, callSession: String, onResult: (Boolean, String?) -> Unit) {
+        val file = File(filePath)
+        if (!file.exists()) {
+            onResult(false, "file not found")
+            return
+        }
+
+        val body = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("audio/mpeg"), file))
+            .addFormDataPart("callSession", callSession)
+            .build()
+
+        val request = Request.Builder()
+            .url(uploadUrl)
+            .post(body)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onResponse(call: Call, response: Response) {
+                val ok = response.isSuccessful
+                onResult(ok, if (ok) response.body()?.string() else response.message())
+            }
+
+            override fun onFailure(call: Call, e: IOException) {
+                onResult(false, e.message)
+            }
+        })
+    }
+}
