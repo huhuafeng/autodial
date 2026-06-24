@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.PROCESS_OUTGOING_CALLS,
         Manifest.permission.READ_CALL_LOG,
         Manifest.permission.RECORD_AUDIO,
-        Manifest.permission.POST_NOTIFICATIONS
+        Manifest.permission.POST_NOTIFICATIONS,
     )
 
     private val permissionLauncher = registerForActivityResult(
