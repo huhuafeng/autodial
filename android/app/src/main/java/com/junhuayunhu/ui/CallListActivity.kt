@@ -84,13 +84,10 @@ class RecordAdapter(private val data: List<CallRecord>) :
 
         val badge = h.root.findViewById<TextView>(R.id.tv_status_badge)
         badge.text = if (r.status == "answered") "已接通" else "未接通"
-        badge.setBackgroundResource(
-            if (r.status == "answered") android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFF52C41A.toInt()); cornerRadius = 9f; shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            } else android.graphics.drawable.GradientDrawable().apply {
-                setColor(0xFFC0C4CC.toInt()); cornerRadius = 9f; shape = android.graphics.drawable.GradientDrawable.RECTANGLE
-            }
-        )
+        badge.background = android.graphics.drawable.GradientDrawable().apply {
+            setColor(if (r.status == "answered") 0xFF52C41A.toInt() else 0xFFC0C4CC.toInt())
+            cornerRadius = 9f
+        }
 
         h.root.findViewById<TextView>(R.id.tv_time).text = fmt.format(Date(r.timestamp))
         h.root.findViewById<TextView>(R.id.tv_duration).text = formatDur(r.duration)
