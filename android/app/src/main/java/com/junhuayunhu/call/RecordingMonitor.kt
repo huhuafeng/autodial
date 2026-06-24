@@ -13,15 +13,24 @@ class RecordingMonitor(context: Context) {
     private val config = ConfigManager(context)
     private val logger = FileLogger(context)
     private val uploadedSessions = mutableSetOf<String>()
+    private val cacheDir = context.cacheDir
 
     var onRecordingFound: ((filePath: String) -> Unit)? = null
 
-    private fun markerFile(path: String): String = path + ".uploaded"
+    private fun markerFileFor(fullPath: String): java.io.File {
+        val name = fullPath.substringAfterLast('/').replace(Regex("[^a-zA-Z0-9_.-]"), "_")
+        return java.io.File(cacheDir, "uploaded_$name.marker")
+    }
 
-    private fun isAlreadyUploaded(path: String): Boolean = java.io.File(markerFile(path)).exists()
+    private fun isAlreadyUploaded(path: String): Boolean = markerFileFor(path).exists()
 
     private fun markUploaded(path: String) {
-        try { java.io.File(markerFile(path)).createNewFile() } catch (_: Exception) {}
+        try {
+            val ok = markerFileFor(path).createNewFile()
+            logger.i("RecordMon", "marker for ${path.substringAfterLast('/')}: ${if (ok) "created" : "exists"}")
+        } catch (e: Exception) {
+            logger.e("RecordMon", "marker failed: ${e.message}")
+        }
     }
 
     fun waitForRecording(
@@ -109,8 +118,9 @@ class RecordingMonitor(context: Context) {
     }
 
     private fun searchByTime(dir: File, suffix: String): String? {
-        val files = dir.listFiles { f -> f.name.endsWith(suffix, ignoreCase = true) }
-            ?.sortedByDescending { it.lastModified() }
+        val files = dir.listFiles { f ->
+            f.name.endsWith(suffix, ignoreCase = true) && !isAlreadyUploaded(f.absolutePath)
+        }?.sortedByDescending { it.lastModified() }
         if (files.isNullOrEmpty()) return null
         val candidate = files.first()
         val isRecent = System.currentTimeMillis() - candidate.lastModified() < 8000
