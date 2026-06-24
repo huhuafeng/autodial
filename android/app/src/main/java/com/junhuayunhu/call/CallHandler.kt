@@ -1,6 +1,7 @@
 package com.junhuayunhu.call
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -40,25 +41,28 @@ class CallHandler(private val context: Context) {
         callStartTime = 0
         callAnswered = false
 
-        val telecom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && telecom != null) {
-            // TelecomManager.placeCall() works from background Service (API 29+)
-            val extras = Bundle().apply {
-                putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false)
+        // 先注册监听器，确保即使拨号失败也能捕获状态
+        telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val telecom = context.getSystemService(Context.TELECOM_SERVICE) as TelecomManager
+            try {
+                val extras = Bundle().apply {
+                    putBoolean(TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, false)
+                }
+                telecom.placeCall(Uri.fromParts("tel", phone, null), extras)
+                return
+            } catch (_: SecurityException) {
+                // MANAGE_OWN_CALLS 未授权，fallback 到 ACTION_CALL
             }
-            telecom.placeCall(Uri.fromParts("tel", phone, null), extras)
-        } else {
-            // fallback for older devices
-            val intent = android.content.Intent(android.content.Intent.ACTION_CALL, Uri.parse("tel:$phone")).apply {
-                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-            context.startActivity(intent)
         }
 
-        telephonyManager.listen(listener, PhoneStateListener.LISTEN_CALL_STATE)
+        // fallback: 用传统的 ACTION_CALL（需要前台 Activity）
+        val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$phone")).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
     }
-
-    fun isBackgroundDialSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     fun getCallSession(): String? = currentCallSession
 

@@ -16,6 +16,14 @@ class RecordingMonitor(context: Context) {
 
     var onRecordingFound: ((filePath: String) -> Unit)? = null
 
+    private fun markerFile(path: String): String = path + ".uploaded"
+
+    private fun isAlreadyUploaded(path: String): Boolean = java.io.File(markerFile(path)).exists()
+
+    private fun markUploaded(path: String) {
+        try { java.io.File(markerFile(path)).createNewFile() } catch (_: Exception) {}
+    }
+
     fun waitForRecording(
         phone: String,
         callSession: String,
@@ -42,6 +50,12 @@ class RecordingMonitor(context: Context) {
                 if (dir.exists()) {
                     found = searchByKeyword(dir, phone, keyword, suffix)
                         ?: searchByTime(dir, suffix)
+                    if (found != null && isAlreadyUploaded(found)) {
+                        logger.i("RecordMon", "skip already uploaded: $found")
+                        found = null
+                        Thread.sleep(1000)
+                        continue
+                    }
                     // verify file is stable (not still being written)
                     if (found != null && !isFileStable(found)) {
                         logger.i("RecordMon", "file not stable yet, wait...")
@@ -54,6 +68,7 @@ class RecordingMonitor(context: Context) {
             logger.i("RecordMon", if (found != null) "found: $found" else "not found after ${timeoutMs}ms")
             if (found != null) {
                 uploadedSessions.add(callSession)
+                markUploaded(found)
                 onRecordingFound?.invoke(found)
             }
             onResult(found)

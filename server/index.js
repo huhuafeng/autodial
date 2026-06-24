@@ -15,11 +15,10 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname)
-    const phone = (req.body && req.body.phone) || 'unknown'
+    const phoneRaw = req.body && req.body.phone
+    const phone = phoneRaw && phoneRaw.trim() ? String(phoneRaw).replace(/[^0-9]/g, '') : 'unknown'
     const session = (req.body && req.body.callSession) || Date.now()
-    // sanitize phone for filename
-    const safePhone = String(phone).replace(/[^0-9]/g, '')
-    cb(null, `${safePhone}_${session}${ext}`)
+    cb(null, `${phone}_${session}${ext}`)
   }
 })
 const upload = multer({ storage })
