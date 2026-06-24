@@ -1,4 +1,4 @@
-package com.bohaoliandong
+package com.junhuayunhu
 
 import android.Manifest
 import android.content.Intent
@@ -13,8 +13,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bohaoliandong.service.MainService
-import com.bohaoliandong.utils.ConfigManager
+import com.junhuayunhu.service.MainService
+import com.junhuayunhu.utils.ConfigManager
 
 class MainActivity : AppCompatActivity() {
 

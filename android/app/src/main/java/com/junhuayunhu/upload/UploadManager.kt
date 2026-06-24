@@ -1,7 +1,7 @@
-package com.bohaoliandong.upload
+package com.junhuayunhu.upload
 
 import android.content.Context
-import com.bohaoliandong.BuildConfig
+import com.junhuayunhu.BuildConfig
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.asRequestBody

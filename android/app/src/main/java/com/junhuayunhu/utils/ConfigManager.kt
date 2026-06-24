@@ -1,8 +1,8 @@
-package com.bohaoliandong.utils
+package com.junhuayunhu.utils
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.bohaoliandong.BuildConfig
+import com.junhuayunhu.BuildConfig
 
 class ConfigManager(context: Context) {
 

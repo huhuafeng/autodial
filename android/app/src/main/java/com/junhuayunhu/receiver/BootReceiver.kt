@@ -1,10 +1,10 @@
-package com.bohaoliandong.receiver
+package com.junhuayunhu.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.bohaoliandong.service.MainService
-import com.bohaoliandong.utils.FileLogger
+import com.junhuayunhu.service.MainService
+import com.junhuayunhu.utils.FileLogger
 
 class BootReceiver : BroadcastReceiver() {
 

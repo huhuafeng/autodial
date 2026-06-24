@@ -1,4 +1,4 @@
-package com.bohaoliandong.model
+package com.junhuayunhu.model
 
 data class WsMessage(
     val type: String,

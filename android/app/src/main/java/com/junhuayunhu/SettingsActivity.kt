@@ -1,4 +1,4 @@
-package com.bohaoliandong
+package com.junhuayunhu
 
 import android.Manifest
 import android.content.Intent
@@ -15,7 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.bohaoliandong.utils.ConfigManager
+import com.junhuayunhu.utils.ConfigManager
 
 class SettingsActivity : AppCompatActivity() {
 

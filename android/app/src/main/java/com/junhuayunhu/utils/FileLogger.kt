@@ -1,4 +1,4 @@
-package com.bohaoliandong.utils
+package com.junhuayunhu.utils
 
 import android.content.Context
 import android.util.Log

@@ -1,7 +1,7 @@
-package com.bohaoliandong.service
+package com.junhuayunhu.service
 
 import android.content.Context
-import com.bohaoliandong.utils.FileLogger
+import com.junhuayunhu.utils.FileLogger
 import okhttp3.*
 import java.util.concurrent.TimeUnit
 
@@ -36,7 +36,7 @@ class WebSocketManager(context: Context, private val logger: FileLogger) {
             override fun onMessage(ws: WebSocket, text: String) {
                 logger.i("WSMgr", "recv: $text")
                 try {
-                    val msg = gson.fromJson(text, com.bohaoliandong.model.WsMessage::class.java)
+                    val msg = gson.fromJson(text, com.junhuayunhu.model.WsMessage::class.java)
                     if (msg.type == "dial") {
                         onDialRequest?.invoke(msg.phone ?: "", msg.callSession ?: "")
                     }

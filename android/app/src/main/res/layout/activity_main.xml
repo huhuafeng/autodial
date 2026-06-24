@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="博浩联动"
+            android:text="君华云呼"
             android:textSize="28sp"
             android:textColor="#0090FF"
             android:textStyle="bold" />
@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="自动拨号与录音服务"
+            android:text="云呼叫中心"
             android:textSize="14sp"
             android:textColor="#909399" />
 

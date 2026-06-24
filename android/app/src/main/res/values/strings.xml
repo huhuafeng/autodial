@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">博浩联动</string>
-    <string name="channel_name">博浩联动服务</string>
+    <string name="app_name">君华云呼</string>
+    <string name="channel_name">君华云呼服务</string>
     <string name="channel_desc">自动拨号与录音服务</string>
-    <string name="service_running">正在运行</string>
-    <string name="service_connecting">连接中...</string>
+    <string name="service_running">云呼服务运行中</string>
+    <string name="service_connecting">正在连接服务器...</string>
     <string name="service_disconnected">连接断开，正在重连</string>
 </resources>

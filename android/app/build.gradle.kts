@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.bohaoliandong"
+    namespace = "com.junhuayunhu"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.bohaoliandong"
+        applicationId = "com.junhuayunhu"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

@@ -1,4 +1,4 @@
-package com.bohaoliandong.service
+package com.junhuayunhu.service
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -6,13 +6,13 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.telephony.TelephonyManager
-import com.bohaoliandong.App
-import com.bohaoliandong.R
-import com.bohaoliandong.call.CallHandler
-import com.bohaoliandong.call.RecordingMonitor
-import com.bohaoliandong.upload.UploadManager
-import com.bohaoliandong.utils.ConfigManager
-import com.bohaoliandong.utils.FileLogger
+import com.junhuayunhu.App
+import com.junhuayunhu.R
+import com.junhuayunhu.call.CallHandler
+import com.junhuayunhu.call.RecordingMonitor
+import com.junhuayunhu.upload.UploadManager
+import com.junhuayunhu.utils.ConfigManager
+import com.junhuayunhu.utils.FileLogger
 
 class MainService : Service() {
 

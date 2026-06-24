@@ -24,7 +24,7 @@
         android:name=".App"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="博浩联动"
+        android:label="君华云呼"
         android:supportsRtl="true"
         android:theme="@style/Theme.BohaoLianDong"
         android:usesCleartextTraffic="true"

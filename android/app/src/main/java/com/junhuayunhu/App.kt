@@ -1,4 +1,4 @@
-package com.bohaoliandong
+package com.junhuayunhu
 
 import android.app.Application
 import android.app.NotificationChannel
@@ -24,6 +24,6 @@ class App : Application() {
     }
 
     companion object {
-        const val CHANNEL_ID = "bohaoliandong_service"
+        const val CHANNEL_ID = "junhuayunhu_service"
     }
 }

@@ -1,2 +1,2 @@
 -keepattributes *Annotation*
--keep class com.bohaoliandong.** { *; }
+-keep class com.junhuayunhu.** { *; }
