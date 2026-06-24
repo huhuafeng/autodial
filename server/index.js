@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname)
     const phoneRaw = req.body && req.body.phone
-    const phone = phoneRaw && phoneRaw.trim() ? String(phoneRaw).replace(/[^0-9]/g, '') : 'unknown'
+    const phone = phoneRaw && phoneRaw.trim() ? String(phoneRaw).replace(/[^0-9]/g, '') : 'no-phone'
     const session = (req.body && req.body.callSession) || Date.now()
     cb(null, `${phone}_${session}${ext}`)
   }

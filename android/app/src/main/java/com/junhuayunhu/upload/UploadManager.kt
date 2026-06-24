@@ -33,7 +33,7 @@ class UploadManager(private val context: Context) {
             .setType(MultipartBody.FORM)
             .addFormDataPart("file", file.name, fileBody)
             .addFormDataPart("callSession", callSession)
-            .addFormDataPart("phone", phone)
+            .addFormDataPart("phone", phone.ifEmpty { "no-phone" })
             .build()
 
         val request = Request.Builder()
