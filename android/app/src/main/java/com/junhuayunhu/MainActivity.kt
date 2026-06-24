@@ -27,19 +27,21 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.READ_CALL_LOG,
         Manifest.permission.RECORD_AUDIO,
         Manifest.permission.POST_NOTIFICATIONS,
-        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
     )
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { result ->
         val denied = result.filter { !it.value }.keys
-        if (denied.isEmpty()) {
-            checkStoragePermission()
-        } else {
-            Toast.makeText(this, "部分权限被拒绝，功能可能受限", Toast.LENGTH_LONG).show()
-            checkStoragePermission()
+        val critical = denied.intersect(setOf(
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_PHONE_STATE,
+        ))
+        if (critical.isNotEmpty()) {
+            Toast.makeText(this, "拨号和录音权限被拒绝，功能可能受限", Toast.LENGTH_LONG).show()
         }
+        checkStoragePermission()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

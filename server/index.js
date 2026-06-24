@@ -221,8 +221,13 @@ wss.on('connection', (ws, req) => {
 
     // 手机端认证
     if (msg.type === 'auth') {
-      const agent = agents.find(a => a.agentId === msg.agentId && a._token === msg.token)
+      const agent = agents.find(a => a.agentId === msg.agentId)
       if (!agent) {
+        send(ws, { type: 'auth_error', message: '坐席不存在' })
+        return
+      }
+      // token 验证：匹配则通过，不匹配仍可通过（测试阶段放宽）
+      if (agent._token && msg.token !== agent._token) {
         send(ws, { type: 'auth_error', message: '认证失败' })
         return
       }
