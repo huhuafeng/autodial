@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoDial - 自动拨号</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+.container { background: #fff; border-radius: 20px; padding: 40px; width: 420px; box-shadow: 0 8px 30px rgba(0,0,0,.08); }
+.status-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #f0f0f0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.online { background: #52c41a; box-shadow: 0 0 8px rgba(82, 196, 26, .4); }
+.dot.offline { background: #ff4d4f; }
+.status-label { font-size: 14px; color: #666; }
+.role-badge { font-size: 12px; padding: 2px 10px; border-radius: 10px; background: #e6f7ff; color: #1890ff; margin-left: auto; }
+.input-area { margin-bottom: 24px; }
+.input-area label { font-size: 14px; color: #333; font-weight: 500; display: block; margin-bottom: 8px; }
+.input-row { display: flex; gap: 12px; }
+.input-row input { flex: 1; height: 48px; border: 2px solid #e8e8e8; border-radius: 12px; padding: 0 16px; font-size: 18px; letter-spacing: 2px; outline: none; transition: border .2s; }
+.input-row input:focus { border-color: #1890ff; }
+.btn-dial { height: 48px; min-width: 100px; background: #1890ff; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 500; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-dial:hover { background: #40a9ff; }
+.btn-dial:active { transform: scale(.97); }
+.btn-dial:disabled { background: #d9d9d9; cursor: not-allowed; }
+.btn-dial .icon { font-size: 18px; }
+.status-card { background: #fafafa; border-radius: 12px; padding: 16px; min-height: 60px; display: flex; flex-direction: column; justify-content: center; }
+.status-empty { text-align: center; color: #bbb; font-size: 14px; }
+.status-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.status-item .label { color: #666; font-size: 14px; }
+.status-item .value { font-weight: 500; font-size: 14px; }
+.status-item .value.calling { color: #faad14; }
+.status-item .value.answered { color: #52c41a; }
+.status-item .value.ended { color: #ff4d4f; }
+.log-area { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+.log-area .log-title { font-size: 12px; color: #999; margin-bottom: 8px; }
+.log-list { max-height: 150px; overflow-y: auto; font-size: 12px; color: #888; line-height: 1.8; }
+.log-list::-webkit-scrollbar { width: 4px; }
+.log-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="status-bar">
+    <span class="dot offline" id="statusDot"></span>
+    <span class="status-label" id="statusLabel">未连接</span>
+    <span class="role-badge" id="roleBadge">WEB</span>
+  </div>
+
+  <div class="input-area">
+    <label>📞 电话号码</label>
+    <div class="input-row">
+      <input type="tel" id="phoneInput" placeholder="输入号码" maxlength="20">
+      <button class="btn-dial" id="dialBtn" disabled><span class="icon">📞</span> 拨号</button>
+    </div>
+  </div>
+
+  <div class="status-card" id="statusCard">
+    <div class="status-empty">等待拨号...</div>
+  </div>
+
+  <div class="log-area">
+    <div class="log-title">操作日志</div>
+    <div class="log-list" id="logList"></div>
+  </div>
+</div>
+
+<script>
+const WS_URL = `ws://${location.host}`
+let ws = null
+let reconnectTimer = null
+
+const $ = id => document.getElementById(id)
+const dot = $('statusDot')
+const label = $('statusLabel')
+const roleBadge = $('roleBadge')
+const phoneInput = $('phoneInput')
+const dialBtn = $('dialBtn')
+const statusCard = $('statusCard')
+const logList = $('logList')
+
+function addLog(msg) {
+  const ts = new Date().toLocaleTimeString()
+  const el = document.createElement('div')
+  el.textContent = `[${ts}] ${msg}`
+  logList.appendChild(el)
+  logList.scrollTop = logList.scrollHeight
+}
+
+function setOnline(on) {
+  dot.className = `dot ${on ? 'online' : 'offline'}`
+  label.textContent = on ? '已连接' : '未连接'
+  dialBtn.disabled = !on
+}
+
+function setStatus(data) {
+  const { status, phone, callSession } = data
+  const statusMap = {
+    calling: { text: '📞 呼叫中...', cls: 'calling' },
+    answered: { text: '✅ 已接听', cls: 'answered' },
+    ended: { text: '⏹️ 已挂断', cls: 'ended' },
+    record_ready: { text: '📁 录音已就绪', cls: 'answered' }
+  }
+  const s = statusMap[status] || { text: status, cls: '' }
+  const card = status === 'ended'
+    ? `<div class="status-item"><span class="label">状态</span><span class="value ${s.cls}">${s.text}</span></div>
+       <div class="status-item"><span class="label">号码</span><span class="value">${phone || '-'}</span></div>`
+    : `<div class="status-item"><span class="label">状态</span><span class="value ${s.cls}">${s.text}</span></div>
+       <div class="status-item"><span class="label">号码</span><span class="value">${phone || '-'}</span></div>`
+  statusCard.innerHTML = card
+  addLog(`通话状态: ${phone} → ${status}`)
+}
+
+function connect() {
+  if (ws) { ws.close(); ws = null }
+
+  try {
+    ws = new WebSocket(WS_URL)
+  } catch (e) {
+    addLog(`连接失败: ${e.message}`)
+    scheduleReconnect()
+    return
+  }
+
+  ws.onopen = () => {
+    setOnline(true)
+    addLog('WebSocket 已连接')
+    ws.send(JSON.stringify({ type: 'register', role: 'web' }))
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
+  }
+
+  ws.onmessage = (e) => {
+    let data
+    try { data = JSON.parse(e.data) } catch { return }
+
+    if (data.type === 'registered') {
+      addLog(`注册成功: ${data.role}`)
+      return
+    }
+
+    if (data.type === 'status') {
+      setStatus(data)
+      return
+    }
+
+    if (data.type === 'record_ready') {
+      addLog(`📁 录音已上传: ${data.fileName}`)
+      return
+    }
+
+    if (data.type === 'error') {
+      addLog(`❌ 错误: ${data.message}`)
+      return
+    }
+  }
+
+  ws.onclose = () => {
+    setOnline(false)
+    addLog('连接已断开')
+    scheduleReconnect()
+  }
+
+  ws.onerror = () => {}
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return
+  addLog('3 秒后自动重连...')
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null
+    connect()
+  }, 3000)
+}
+
+dialBtn.addEventListener('click', () => {
+  const phone = phoneInput.value.trim()
+  if (!phone) { addLog('⚠️ 请输入号码'); return }
+  if (!/^[\d*#+\-]+$/.test(phone)) { addLog('⚠️ 号码格式不正确'); return }
+  const callSession = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
+  const msg = { type: 'dial', phone, callSession }
+  ws.send(JSON.stringify(msg))
+  addLog(`📞 发送拨号: ${phone}`)
+  statusCard.innerHTML = `
+    <div class="status-item"><span class="label">状态</span><span class="value calling">📤 已发送拨号指令</span></div>
+    <div class="status-item"><span class="label">号码</span><span class="value">${phone}</span></div>
+  `
+})
+
+phoneInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') dialBtn.click()
+})
+
+connect()
+</script>
+</body>
+</html>
