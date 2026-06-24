@@ -40,6 +40,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BohaoLianDong" />
+
         <service
             android:name=".service.MainService"
             android:exported="false"

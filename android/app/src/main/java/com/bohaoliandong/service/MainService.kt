@@ -7,32 +7,38 @@ import android.content.Intent
 import android.os.IBinder
 import android.telephony.TelephonyManager
 import com.bohaoliandong.App
-import com.bohaoliandong.BuildConfig
 import com.bohaoliandong.R
 import com.bohaoliandong.call.CallHandler
 import com.bohaoliandong.call.RecordingMonitor
 import com.bohaoliandong.upload.UploadManager
+import com.bohaoliandong.utils.ConfigManager
+import com.bohaoliandong.utils.FileLogger
 
 class MainService : Service() {
 
+    private lateinit var config: ConfigManager
+    private lateinit var logger: FileLogger
     private lateinit var wsManager: WebSocketManager
     private lateinit var callHandler: CallHandler
     private lateinit var recordingMonitor: RecordingMonitor
     private lateinit var uploadManager: UploadManager
     private var wsConnected = false
-    private var currentCallSession: String? = null
 
     override fun onCreate() {
         super.onCreate()
+        config = ConfigManager(this)
+        logger = FileLogger(this)
         startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.service_connecting)))
 
-        wsManager = WebSocketManager(this)
+        wsManager = WebSocketManager(this, logger)
         callHandler = CallHandler(this)
         recordingMonitor = RecordingMonitor(this)
         uploadManager = UploadManager(this)
 
+        uploadManager.uploadUrl = config.uploadUrl
+
         wsManager.onDialRequest = { phone, callSession ->
-            currentCallSession = callSession
+            logger.i("MainSvc", "dial request phone=$phone session=$callSession")
             sendWsStatus("calling", phone, callSession)
             callHandler.dial(phone, callSession)
         }
@@ -42,9 +48,11 @@ class MainService : Service() {
             val text = if (connected) getString(R.string.service_running)
                        else getString(R.string.service_disconnected)
             updateNotification(text)
+            logger.i("MainSvc", "WS ${if (connected) "connected" else "disconnected"}")
         }
 
         callHandler.onCallStateChanged = { state, phone ->
+            logger.i("MainSvc", "call state changed: state=$state phone=$phone")
             when (state) {
                 TelephonyManager.CALL_STATE_OFFHOOK -> {
                     sendWsStatus("answered", phone)
@@ -52,9 +60,11 @@ class MainService : Service() {
                 TelephonyManager.CALL_STATE_IDLE -> {
                     val session = callHandler.getCallSession() ?: return@onCallStateChanged
                     sendWsStatus("ended", phone)
-                    recordingMonitor.waitForRecording { path ->
+                    recordingMonitor.waitForRecording(phone ?: "") { path ->
+                        logger.i("MainSvc", "recording result: $path")
                         if (path != null) {
-                            uploadManager.upload(path, session) { ok, _ ->
+                            uploadManager.upload(path, session) { ok, msg ->
+                                logger.i("MainSvc", "upload result: ok=$ok msg=$msg")
                                 if (ok) {
                                     wsManager.send(toJson(mapOf(
                                         "type" to "record_ready",
@@ -71,13 +81,16 @@ class MainService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        wsManager.connect(BuildConfig.WS_URL)
+        val url = config.wsUrl
+        logger.i("MainSvc", "starting with WS_URL=$url")
+        wsManager.connect(url)
         return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        logger.i("MainSvc", "service destroyed")
         wsManager.disconnect()
         callHandler.cleanup()
         super.onDestroy()
@@ -87,11 +100,12 @@ class MainService : Service() {
         val msg = mutableMapOf("type" to "status", "status" to status)
         if (phone != null) msg["phone"] = phone
         if (session != null) msg["callSession"] = session
-        wsManager.send(toJson(msg))
+        val json = toJson(msg)
+        logger.i("MainSvc", "send status: $json")
+        wsManager.send(json)
     }
 
     private val gson = com.google.gson.Gson()
-
     private fun toJson(map: Map<String, String?>): String = gson.toJson(map)
 
     private fun buildNotification(text: String): Notification {

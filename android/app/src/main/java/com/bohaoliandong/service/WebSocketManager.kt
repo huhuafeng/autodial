@@ -1,19 +1,16 @@
 package com.bohaoliandong.service
 
 import android.content.Context
-import android.content.Intent
-import android.os.Handler
-import android.os.Looper
+import com.bohaoliandong.utils.FileLogger
 import okhttp3.*
 import java.util.concurrent.TimeUnit
 
-class WebSocketManager(private val context: Context) {
+class WebSocketManager(context: Context, private val logger: FileLogger) {
 
     private var webSocket: WebSocket? = null
     private var reconnectAttempt = 0
-    private val handler = Handler(Looper.getMainLooper())
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var reconnectRunnable: Runnable? = null
-    private var pingRunnable: Runnable? = null
 
     var onDialRequest: ((phone: String, callSession: String) -> Unit)? = null
     var onConnectionStateChange: ((connected: Boolean) -> Unit)? = null
@@ -23,31 +20,39 @@ class WebSocketManager(private val context: Context) {
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .build()
 
+    private val gson = com.google.gson.Gson()
+
     fun connect(url: String) {
+        logger.i("WSMgr", "connecting to $url")
         val request = Request.Builder().url(url).build()
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(ws: WebSocket, response: Response) {
                 reconnectAttempt = 0
-                send(com.google.gson.Gson().toJson(mapOf("type" to "register", "role" to "phone")))
+                logger.i("WSMgr", "connected")
+                ws.send(gson.toJson(mapOf("type" to "register", "role" to "phone")))
                 onConnectionStateChange?.invoke(true)
-                startPing()
             }
 
             override fun onMessage(ws: WebSocket, text: String) {
+                logger.i("WSMgr", "recv: $text")
                 try {
-                    val msg = com.google.gson.Gson().fromJson(text, com.bohaoliandong.model.WsMessage::class.java)
+                    val msg = gson.fromJson(text, com.bohaoliandong.model.WsMessage::class.java)
                     if (msg.type == "dial") {
                         onDialRequest?.invoke(msg.phone ?: "", msg.callSession ?: "")
                     }
-                } catch (_: Exception) {}
+                } catch (e: Exception) {
+                    logger.e("WSMgr", "parse error: ${e.message}")
+                }
             }
 
             override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
+                logger.e("WSMgr", "failure: ${t.message}")
                 onConnectionStateChange?.invoke(false)
                 scheduleReconnect(url)
             }
 
             override fun onClosed(ws: WebSocket, code: Int, reason: String) {
+                logger.i("WSMgr", "closed: $code $reason")
                 onConnectionStateChange?.invoke(false)
                 scheduleReconnect(url)
             }
@@ -55,11 +60,12 @@ class WebSocketManager(private val context: Context) {
     }
 
     fun send(json: String) {
+        logger.i("WSMgr", "send: $json")
         webSocket?.send(json)
     }
 
     fun disconnect() {
-        stopPing()
+        logger.i("WSMgr", "disconnect")
         handler.removeCallbacksAndMessages(null)
         webSocket?.close(1000, "bye")
         webSocket = null
@@ -68,18 +74,8 @@ class WebSocketManager(private val context: Context) {
     private fun scheduleReconnect(url: String) {
         val delay = (1 shl minOf(reconnectAttempt, 5)) * 1000L
         reconnectAttempt++
+        logger.i("WSMgr", "reconnect in ${delay}ms (attempt $reconnectAttempt)")
         reconnectRunnable = Runnable { connect(url) }
         handler.postDelayed(reconnectRunnable!!, delay)
-    }
-
-    private fun startPing() {
-        stopPing()
-        pingRunnable = Runnable { webSocket?.send(com.google.gson.Gson().toJson(mapOf("type" to "ping"))) }
-        handler.postDelayed(pingRunnable!!, 25000)
-    }
-
-    private fun stopPing() {
-        pingRunnable?.let { handler.removeCallbacks(it) }
-        pingRunnable = null
     }
 }

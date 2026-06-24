@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,8 +14,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bohaoliandong.service.MainService
+import com.bohaoliandong.utils.ConfigManager
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var config: ConfigManager
 
     private val requiredPermissions = mutableListOf(
         Manifest.permission.CALL_PHONE,
@@ -32,14 +36,37 @@ class MainActivity : AppCompatActivity() {
         if (denied.isEmpty()) {
             checkStoragePermission()
         } else {
-            Toast.makeText(this, "需要授权才能使用完整功能", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "部分权限被拒绝，功能可能受限", Toast.LENGTH_LONG).show()
+            checkStoragePermission()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        config = ConfigManager(this)
+
+        if (config.wsUrl.contains("127.0.0.1") || config.wsUrl.contains("localhost")) {
+            startActivity(Intent(this, SettingsActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
+
+        findViewById<android.widget.Button>(R.id.btn_settings)?.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
         checkPermissions()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::config.isInitialized && !config.wsUrl.contains("127.0.0.1")) {
+            if (checkBasicPermissions() && checkStoragePermitted()) {
+                startService()
+            }
+        }
     }
 
     private fun checkPermissions() {
@@ -49,6 +76,13 @@ class MainActivity : AppCompatActivity() {
 
         if (needRequest.isEmpty()) {
             checkStoragePermission()
+        } else if (needRequest.any { shouldShowRequestPermissionRationale(it) }) {
+            AlertDialog.Builder(this)
+                .setTitle("需要权限")
+                .setMessage("自动拨号和录音需要以下权限：拨打电话、读取通话状态、录音、通知")
+                .setPositiveButton("去授权") { _, _ -> permissionLauncher.launch(needRequest.toTypedArray()) }
+                .setNegativeButton("稍后", null)
+                .show()
         } else {
             permissionLauncher.launch(needRequest.toTypedArray())
         }
@@ -69,33 +103,21 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton("稍后", null)
                     .show()
             } else {
-                startService()
+                checkBatteryOptimization()
             }
         } else {
-            val storagePerm = Manifest.permission.READ_EXTERNAL_STORAGE
-            if (ContextCompat.checkSelfPermission(this, storagePerm) != PackageManager.PERMISSION_GRANTED) {
-                permissionLauncher.launch(arrayOf(storagePerm))
+            val sp = Manifest.permission.READ_EXTERNAL_STORAGE
+            if (ContextCompat.checkSelfPermission(this, sp) != PackageManager.PERMISSION_GRANTED) {
+                permissionLauncher.launch(arrayOf(sp))
             } else {
-                startService()
+                checkBatteryOptimization()
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
-            startService()
-        }
-    }
-
-    private fun startService() {
-        checkBatteryOptimization()
-        startForegroundService(Intent(this, MainService::class.java))
     }
 
     private fun checkBatteryOptimization() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = getSystemService(POWER_SERVICE) as android.os.PowerManager
+            val pm = getSystemService(POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
                 AlertDialog.Builder(this)
                     .setTitle("省电策略")
@@ -110,5 +132,24 @@ class MainActivity : AppCompatActivity() {
                     .show()
             }
         }
+        startService()
+    }
+
+    private fun checkBasicPermissions(): Boolean {
+        return requiredPermissions.all {
+            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun checkStoragePermitted(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun startService() {
+        startForegroundService(Intent(this, MainService::class.java))
     }
 }

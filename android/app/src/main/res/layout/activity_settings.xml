@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F7FF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚙️ 服务器配置"
+            android:textSize="18sp"
+            android:textColor="#303133"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="WebSocket 地址"
+            android:textSize="13sp"
+            android:textColor="#909399" />
+        <EditText
+            android:id="@+id/et_ws_url"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input"
+            android:hint="ws://你的服务器IP:8080"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="录音上传地址"
+            android:textSize="13sp"
+            android:textColor="#909399" />
+        <EditText
+            android:id="@+id/et_upload_url"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input"
+            android:hint="http://你的服务器IP:8080/upload"
+            android:padding="12dp"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="录音目录路径"
+            android:textSize="13sp"
+            android:textColor="#909399"
+            android:layout_marginTop="4dp" />
+        <EditText
+            android:id="@+id/et_call_rec_path"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input"
+            android:hint="/storage/emulated/0/MIUI/sound_recorder/call_rec"
+            android:padding="12dp"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="文件名关键词"
+                    android:textSize="13sp"
+                    android:textColor="#909399" />
+                <EditText
+                    android:id="@+id/et_keyword"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input"
+                    android:hint="mobile_time"
+                    android:padding="12dp"
+                    android:textSize="13sp"
+                    android:layout_marginEnd="6dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="后缀"
+                    android:textSize="13sp"
+                    android:textColor="#909399" />
+                <EditText
+                    android:id="@+id/et_suffix"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_input"
+                    android:hint=".mp3"
+                    android:padding="12dp"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="#0090FF"
+            android:text="💾 保存并返回"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E8E8E8"
+            android:layout_marginVertical="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔐 权限状态"
+            android:textSize="18sp"
+            android:textColor="#303133"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <TextView android:id="@+id/tv_perm_phone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_state" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_audio" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_notification" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_storage" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="6dp" />
+        <TextView android:id="@+id/tv_perm_battery" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="#606266" android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btn_fix_permissions"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="#E8F4FF"
+            android:text="🔧 去设置页授予权限"
+            android:textColor="#0090FF"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_fix_storage"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="#E8F4FF"
+            android:text="📁 授予文件访问权限"
+            android:textColor="#0090FF"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <Button
+            android:id="@+id/btn_fix_battery"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:background="#E8F4FF"
+            android:text="🔋 忽略电池优化"
+            android:textColor="#0090FF"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E8E8E8"
+            android:layout_marginVertical="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📱 MIUI 特殊设置"
+            android:textSize="18sp"
+            android:textColor="#303133"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:textColor="#909399"
+            android:lineSpacingExtra="4dp"
+            android:text="1️⃣ 开启「通话自动录音」：\n   电话 App → 右上角设置 → 通话录音 → 自动录音\n\n2️⃣ 允许「自启动」：\n   设置 → 应用管理 → 博浩联动 → 自启动 → 开启\n\n3️⃣ 省电策略设为「无限制」：\n   设置 → 应用管理 → 博浩联动 → 省电策略 → 无限制" />
+
+        <Button
+            android:id="@+id/btn_miui_autostart"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="12dp"
+            android:background="#FFF3E0"
+            android:text="🚀 去开启自启动"
+            android:textColor="#E65100"
+            android:textSize="14sp" />
+
+        <View android:layout_height="40dp" android:layout_width="match_parent" />
+
+    </LinearLayout>
+</ScrollView>
