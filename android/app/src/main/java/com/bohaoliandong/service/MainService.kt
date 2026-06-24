@@ -90,16 +90,9 @@ class MainService : Service() {
         wsManager.send(toJson(msg))
     }
 
-    private fun toJson(map: Map<String, String?>): String {
-        val sb = StringBuilder("{")
-        map.entries.forEachIndexed { i, (k, v) ->
-            if (i > 0) sb.append(",")
-            sb.append("\"$k\":")
-            sb.append(if (v != null) "\"${v.replace("\"", "\\\"")}\"" else "null")
-        }
-        sb.append("}")
-        return sb.toString()
-    }
+    private val gson = com.google.gson.Gson()
+
+    private fun toJson(map: Map<String, String?>): String = gson.toJson(map)
 
     private fun buildNotification(text: String): Notification {
         val pi = packageManager.getLaunchIntentForPackage(packageName)?.let {
