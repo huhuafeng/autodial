@@ -17,8 +17,15 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname)
     const phoneRaw = req.body && req.body.phone
     const phone = phoneRaw && phoneRaw.trim() ? String(phoneRaw).replace(/[^0-9]/g, '') : 'no-phone'
-    const session = (req.body && req.body.callSession) || Date.now()
-    cb(null, `${phone}_${session}${ext}`)
+    const now = new Date()
+    const y = now.getFullYear()
+    const mo = String(now.getMonth() + 1).padStart(2, '0')
+    const d = String(now.getDate()).padStart(2, '0')
+    const h = String(now.getHours()).padStart(2, '0')
+    const mi = String(now.getMinutes()).padStart(2, '0')
+    const s = String(now.getSeconds()).padStart(2, '0')
+    const rand = crypto.randomBytes(3).toString('hex')
+    cb(null, `${phone}_${y}${mo}${d}_${h}${mi}${s}_${rand}${ext}`)
   }
 })
 const upload = multer({ storage })

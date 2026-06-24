@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/background"
-    android:fitsSystemWindows="true"
     android:padding="@dimen/spacing_md">
 
     <!-- Title row -->

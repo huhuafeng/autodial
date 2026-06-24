@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.junhuayunhu.R
 import com.junhuayunhu.model.StatsDay
 import com.junhuayunhu.service.ApiClient
@@ -24,6 +25,7 @@ class StatsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         setContentView(R.layout.activity_stats)
 
         val wsUrl = ConfigManager(this).wsUrl

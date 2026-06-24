@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
+import androidx.core.view.WindowCompat
 import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
@@ -63,6 +64,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         setContentView(R.layout.activity_main)
 
         findViewById<android.widget.ImageView>(R.id.btn_settings)?.setOnClickListener {
