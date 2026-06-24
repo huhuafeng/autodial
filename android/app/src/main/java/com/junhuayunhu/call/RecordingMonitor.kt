@@ -27,7 +27,8 @@ class RecordingMonitor(context: Context) {
     private fun markUploaded(path: String) {
         try {
             val ok = markerFileFor(path).createNewFile()
-            logger.i("RecordMon", "marker for ${path.substringAfterLast('/')}: ${if (ok) "created" : "exists"}")
+            val status = if (ok) "created" else "exists"
+            logger.i("RecordMon", "marker for ${path.substringAfterLast('/')}: $status")
         } catch (e: Exception) {
             logger.e("RecordMon", "marker failed: ${e.message}")
         }
