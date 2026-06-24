@@ -45,4 +45,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-service:2.8.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
 }

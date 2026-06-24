@@ -11,7 +11,10 @@ import com.junhuayunhu.R
 import com.junhuayunhu.call.CallHandler
 import com.junhuayunhu.call.RecordingMonitor
 import com.junhuayunhu.upload.UploadManager
+import com.junhuayunhu.model.CallRecord
+import com.junhuayunhu.service.ApiClient
 import com.junhuayunhu.utils.ConfigManager
+import com.junhuayunhu.utils.FileLogger
 import com.junhuayunhu.utils.FileLogger
 
 class MainService : Service() {
@@ -72,6 +75,7 @@ class MainService : Service() {
                                             "fileName" to path.substringAfterLast('/')
                                         )))
                                     }
+                                    syncRecord(session, phone, path)
                                 }
                             }
                         }
@@ -108,6 +112,26 @@ class MainService : Service() {
 
     private val gson = com.google.gson.Gson()
     private fun toJson(map: Map<String, String?>): String = gson.toJson(map)
+
+    private fun syncRecord(session: String, phone: String?, path: String) {
+        try {
+            val baseUrl = config.wsUrl.replace("ws://", "http://").replace("wss://", "https://")
+            val api = ApiClient(baseUrl)
+            val record = CallRecord(
+                phone = phone ?: "unknown",
+                callSession = session,
+                duration = callHandler.getDuration(),
+                status = "answered",
+                recordingUrl = path,
+                timestamp = System.currentTimeMillis()
+            )
+            api.syncRecords(listOf(record)) { result ->
+                logger.i("MainSvc", "sync record: ${result?.success}")
+            }
+        } catch (e: Exception) {
+            logger.e("MainSvc", "sync failed: ${e.message}")
+        }
+    }
 
     private fun buildNotification(text: String): Notification {
         val pi = packageManager.getLaunchIntentForPackage(packageName)?.let {

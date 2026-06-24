@@ -58,6 +58,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
+        findViewById<android.widget.Button>(R.id.btn_stats)?.setOnClickListener {
+            startActivity(Intent(this, ui.StatsActivity::class.java))
+        }
+
         checkPermissions()
     }
 
