@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         if (::config.isInitialized && !config.wsUrl.contains("127.0.0.1")) {
-            if (checkBasicPermissions() && checkStoragePermitted()) {
+            if (checkBasicPermissions()) {
                 startService()
             }
         }
