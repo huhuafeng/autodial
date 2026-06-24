@@ -14,8 +14,8 @@ android {
         versionCode = 1
         versionName = "1.0.0"
 
-        buildConfigField("String", "WS_URL", "\"ws://127.0.0.1:8080\"")
-        buildConfigField("String", "UPLOAD_URL", "\"http://127.0.0.1:8080/upload\"")
+        buildConfigField("String", "WS_URL", "\"ws://192.168.1.111:8080\"")
+        buildConfigField("String", "UPLOAD_URL", "\"http://192.168.1.111:8080/upload\"")
     }
 
     buildTypes {
