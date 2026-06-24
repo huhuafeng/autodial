@@ -8,11 +8,14 @@ import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
+import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.junhuayunhu.service.ApiClient
 import com.junhuayunhu.service.MainService
 import com.junhuayunhu.utils.ConfigManager
 
@@ -54,7 +57,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 未登录 → 跳转登录页
         if (!config.isLoggedIn()) {
             startActivity(Intent(this, com.junhuayunhu.ui.LoginActivity::class.java))
             finish()
@@ -63,14 +65,32 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        findViewById<android.widget.Button>(R.id.btn_settings)?.setOnClickListener {
+        findViewById<android.widget.ImageView>(R.id.btn_settings)?.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        findViewById<android.widget.Button>(R.id.btn_stats)?.setOnClickListener {
+        findViewById<Button>(R.id.btn_stats)?.setOnClickListener {
             startActivity(Intent(this, com.junhuayunhu.ui.StatsActivity::class.java))
         }
 
+        findViewById<Button>(R.id.btn_logout)?.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("退出登录")
+                .setMessage("确定退出当前坐席？")
+                .setPositiveButton("确定") { _, _ ->
+                    config.clearLogin()
+                    stopService(Intent(this, MainService::class.java))
+                    startActivity(Intent(this, com.junhuayunhu.ui.LoginActivity::class.java))
+                    finish()
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        }
+
+        // Agent info
+        findViewById<TextView>(R.id.tv_agent_name)?.text = config.agentName.ifEmpty { config.agentId }
+
+        loadQuickStats()
         checkPermissions()
     }
 
@@ -79,6 +99,22 @@ class MainActivity : AppCompatActivity() {
         if (::config.isInitialized && !config.wsUrl.contains("127.0.0.1")) {
             if (checkBasicPermissions()) {
                 startService()
+            }
+        }
+    }
+
+    private fun loadQuickStats() {
+        val baseUrl = config.wsUrl.replace("ws://", "http://").replace("wss://", "https://")
+        val api = ApiClient(baseUrl)
+        api.getStats { result ->
+            runOnUiThread {
+                if (result != null) {
+                    findViewById<TextView>(R.id.tv_today_calls)?.text = "${result.today.dialout}"
+                    val min = result.today.callLong / 60
+                    val sec = result.today.callLong % 60
+                    findViewById<TextView>(R.id.tv_today_duration)?.text =
+                        if (min > 0) "${min}分${sec}秒" else "${sec}秒"
+                }
             }
         }
     }
@@ -133,7 +169,6 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val pm = getSystemService(POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                // 不阻塞服务启动，仅作提示
                 android.util.Log.w("AutoDial", "battery optimization not disabled")
             }
         }
@@ -143,14 +178,6 @@ class MainActivity : AppCompatActivity() {
     private fun checkBasicPermissions(): Boolean {
         return requiredPermissions.all {
             ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }
-    }
-
-    private fun checkStoragePermitted(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Environment.isExternalStorageManager()
-        } else {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
         }
     }
 

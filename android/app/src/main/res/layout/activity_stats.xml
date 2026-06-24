@@ -1,43 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F7FF">
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:padding="@dimen/spacing_md">
 
+    <!-- Title row -->
     <LinearLayout
-        android:id="@+id/stats_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="@dimen/spacing_md">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_stats" />
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="@dimen/spacing_xs"
+            android:text="通话概况"
+            android:textSize="18sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tv_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint" />
+    </LinearLayout>
+
+    <!-- Loading indicator -->
+    <LinearLayout
+        android:id="@+id/layout_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/spacing_xxl"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载中..."
+            android:textSize="14sp"
+            android:textColor="@color/text_hint" />
+    </LinearLayout>
+
+    <!-- Error state -->
+    <LinearLayout
+        android:id="@+id/layout_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/spacing_xxl"
+        android:visibility="gone"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="暂无数据"
+            android:textSize="14sp"
+            android:textColor="@color/text_hint" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="通话后统计数据将自动更新"
+            android:textSize="12sp"
+            android:textColor="@color/text_disabled"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- Statistics content -->
+    <LinearLayout
+        android:id="@+id/layout_stats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:visibility="gone">
 
+        <!-- Group 1: 接听概况 -->
         <TextView
-            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📊 通话概况"
-            android:textSize="20sp"
-            android:textColor="#303133"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+            android:text="接听概况"
+            android:textSize="13sp"
+            android:textColor="@color/text_hint"
+            android:layout_marginBottom="@dimen/spacing_xs" />
 
-        <Button
-            android:id="@+id/btn_refresh"
+        <LinearLayout
+            android:id="@+id/group_calls"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="20dp"
-            android:text="🔄 刷新"
-            android:textColor="#FFFFFF"
-            android:background="#0090FF" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:layout_marginBottom="@dimen/spacing_md" />
 
-        <Button
-            android:id="@+id/btn_call_list"
+        <!-- Group 2: 质量指标 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="质量指标"
+            android:textSize="13sp"
+            android:textColor="@color/text_hint"
+            android:layout_marginBottom="@dimen/spacing_xs" />
+
+        <LinearLayout
+            android:id="@+id/group_quality"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:layout_marginTop="10dp"
-            android:text="📞 通话记录"
-            android:textColor="#0090FF"
-            android:background="#E8F4FF" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/card_bg"
+            android:layout_marginBottom="@dimen/spacing_md" />
 
     </LinearLayout>
-</ScrollView>
+
+    <!-- Buttons -->
+    <Button
+        android:id="@+id/btn_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:background="@drawable/btn_primary"
+        android:text="刷新"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:stateListAnimator="@null" />
+
+    <Button
+        android:id="@+id/btn_call_list"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginTop="@dimen/spacing_xs"
+        android:background="@color/primary_light"
+        android:text="通话记录"
+        android:textColor="@color/primary"
+        android:textSize="14sp"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>

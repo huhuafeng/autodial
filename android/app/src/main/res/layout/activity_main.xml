@@ -1,68 +1,182 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F7F7FF">
+    android:orientation="vertical"
+    android:background="@color/background"
+    android:padding="@dimen/spacing_md">
 
+    <!-- Top bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="@dimen/spacing_md">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="君华云呼"
+                android:textSize="22sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="云呼叫中心"
+                android:textSize="13sp"
+                android:textColor="@color/text_hint" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/btn_settings"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_settings"
+            android:contentDescription="设置"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+    </LinearLayout>
+
+    <!-- Agent info card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/card_bg"
+        android:padding="@dimen/spacing_md"
+        android:layout_marginBottom="@dimen/spacing_sm">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_agent_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="坐席01"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_agent_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="🟢 在线  · 已连接"
+                android:textSize="13sp"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_ws_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="20sp"
+            android:textColor="@color/success"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Quick stats card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_bg"
+        android:padding="@dimen/spacing_md"
         android:gravity="center"
-        android:orientation="vertical"
-        android:padding="40dp">
+        android:layout_marginBottom="@dimen/spacing_sm">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="君华云呼"
-            android:textSize="28sp"
-            android:textColor="#0090FF"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_today_calls"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textSize="28sp"
+                android:textColor="@color/primary"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今日通话"
+                android:textSize="12sp"
+                android:textColor="@color/text_hint"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="云呼叫中心"
-            android:textSize="14sp"
-            android:textColor="#909399" />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="40dp"
+            android:background="@color/divider" />
 
-        <TextView
-            android:id="@+id/tv_status"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:text="服务运行中..."
-            android:textSize="13sp"
-            android:textColor="#606266" />
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tv_today_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"
+                android:textSize="28sp"
+                android:textColor="@color/primary"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今日时长"
+                android:textSize="12sp"
+                android:textColor="@color/text_hint"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btn_settings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:background="@null"
-        android:text="⚙️"
-        android:textSize="24sp"
-        android:contentDescription="设置" />
+    <!-- Spacer -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
+    <!-- Stats button -->
     <Button
         android:id="@+id/btn_stats"
-        android:layout_width="wrap_content"
-        android:layout_height="44dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"
-        android:background="#E8F4FF"
-        android:text="📊 统计 &amp; 记录"
-        android:textColor="#0090FF"
-        android:textSize="14sp"
-        android:paddingHorizontal="24dp" />
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/spacing_sm"
+        android:background="@color/primary_light"
+        android:text="📊 查看统计"
+        android:textColor="@color/primary"
+        android:textSize="15sp"
+        android:stateListAnimator="@null" />
 
-</RelativeLayout>
+    <!-- Logout button -->
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="@dimen/spacing_xs"
+        android:background="@drawable/btn_danger"
+        android:text="退出登录"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>
