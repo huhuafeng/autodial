@@ -120,17 +120,8 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val pm = getSystemService(POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                AlertDialog.Builder(this)
-                    .setTitle("省电策略")
-                    .setMessage("为了保持后台稳定运行，请允许忽略电池优化")
-                    .setPositiveButton("去设置") { _, _ ->
-                        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                            data = android.net.Uri.parse("package:$packageName")
-                        }
-                        startActivity(intent)
-                    }
-                    .setNegativeButton("稍后", null)
-                    .show()
+                // 不阻塞服务启动，仅作提示
+                android.util.Log.w("AutoDial", "battery optimization not disabled")
             }
         }
         startService()
