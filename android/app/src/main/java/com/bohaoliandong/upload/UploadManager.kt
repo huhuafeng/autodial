@@ -4,7 +4,7 @@ import android.content.Context
 import com.bohaoliandong.BuildConfig
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -27,7 +27,7 @@ class UploadManager(private val context: Context) {
         }
 
         val mime = "audio/mpeg".toMediaType()
-        val fileBody = file.toRequestBody(mime)
+        val fileBody = file.asRequestBody(mime)
 
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)

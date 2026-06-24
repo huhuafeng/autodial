@@ -58,19 +58,20 @@ class MainService : Service() {
                     sendWsStatus("answered", phone)
                 }
                 TelephonyManager.CALL_STATE_IDLE -> {
-                    val session = callHandler.getCallSession() ?: return
-                    sendWsStatus("ended", phone)
-                    recordingMonitor.waitForRecording(phone ?: "") { path ->
-                        logger.i("MainSvc", "recording result: $path")
-                        if (path != null) {
-                            uploadManager.upload(path, session) { ok, msg ->
-                                logger.i("MainSvc", "upload result: ok=$ok msg=$msg")
-                                if (ok) {
-                                    wsManager.send(toJson(mapOf(
-                                        "type" to "record_ready",
-                                        "callSession" to session,
-                                        "fileName" to path.substringAfterLast('/')
-                                    )))
+                    callHandler.getCallSession()?.let { session ->
+                        sendWsStatus("ended", phone)
+                        recordingMonitor.waitForRecording(phone ?: "") { path ->
+                            logger.i("MainSvc", "recording result: $path")
+                            if (path != null) {
+                                uploadManager.upload(path, session) { ok, msg ->
+                                    logger.i("MainSvc", "upload result: ok=$ok msg=$msg")
+                                    if (ok) {
+                                        wsManager.send(toJson(mapOf(
+                                            "type" to "record_ready",
+                                            "callSession" to session,
+                                            "fileName" to path.substringAfterLast('/')
+                                        )))
+                                    }
                                 }
                             }
                         }
