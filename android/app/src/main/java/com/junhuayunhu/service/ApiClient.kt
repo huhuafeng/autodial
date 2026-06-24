@@ -3,6 +3,7 @@ package com.junhuayunhu.service
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.junhuayunhu.model.*
+import com.junhuayunhu.model.LoginResult
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -17,6 +18,15 @@ class ApiClient(private val baseUrl: String) {
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(15, TimeUnit.SECONDS)
         .build()
+
+    fun login(agentId: String, password: String, onResult: (LoginResult?) -> Unit) {
+        val json = gson.toJson(mapOf("agentId" to agentId, "password" to password))
+        val body = json.toRequestBody("application/json".toMediaType())
+        val request = Request.Builder().url("$baseUrl/api/login").post(body).build()
+        client.newCall(request).enqueue(callback { resp ->
+            onResult(resp?.let { gson.fromJson(it, LoginResult::class.java) })
+        })
+    }
 
     fun getStats(onResult: (StatsResult?) -> Unit) {
         get("/api/stats") { body ->

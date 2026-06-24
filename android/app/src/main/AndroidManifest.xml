@@ -53,6 +53,10 @@
             android:name=".ui.CallListActivity"
             android:exported="false"
             android:theme="@style/Theme.BohaoLianDong" />
+        <activity
+            android:name=".ui.LoginActivity"
+            android:exported="true"
+            android:theme="@style/Theme.BohaoLianDong" />
 
         <service
             android:name=".service.MainService"

@@ -52,6 +52,13 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // 未登录 → 跳转登录页
+        if (!config.isLoggedIn()) {
+            startActivity(Intent(this, ui.LoginActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_main)
 
         findViewById<android.widget.Button>(R.id.btn_settings)?.setOnClickListener {

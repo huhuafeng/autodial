@@ -12,8 +12,11 @@ class WebSocketManager(context: Context, private val logger: FileLogger) {
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var reconnectRunnable: Runnable? = null
 
+    var agentId: String = ""
+    var token: String = ""
     var onDialRequest: ((phone: String, callSession: String) -> Unit)? = null
     var onConnectionStateChange: ((connected: Boolean) -> Unit)? = null
+    var onAuthState: ((ok: Boolean, msg: String?) -> Unit)? = null
 
     private val client = OkHttpClient.Builder()
         .pingInterval(30, TimeUnit.SECONDS)
@@ -30,6 +33,11 @@ class WebSocketManager(context: Context, private val logger: FileLogger) {
                 reconnectAttempt = 0
                 logger.i("WSMgr", "connected")
                 ws.send(gson.toJson(mapOf("type" to "register", "role" to "phone")))
+                // send auth
+                if (agentId.isNotEmpty() && token.isNotEmpty()) {
+                    ws.send(gson.toJson(mapOf("type" to "auth", "agentId" to agentId, "token" to token)))
+                    logger.i("WSMgr", "auth sent for $agentId")
+                }
                 onConnectionStateChange?.invoke(true)
             }
 
@@ -37,8 +45,10 @@ class WebSocketManager(context: Context, private val logger: FileLogger) {
                 logger.i("WSMgr", "recv: $text")
                 try {
                     val msg = gson.fromJson(text, com.junhuayunhu.model.WsMessage::class.java)
-                    if (msg.type == "dial") {
-                        onDialRequest?.invoke(msg.phone ?: "", msg.callSession ?: "")
+                    when (msg.type) {
+                        "auth_ok" -> onAuthState?.invoke(true, msg.agentId)
+                        "auth_error" -> onAuthState?.invoke(false, msg.message)
+                        "dial" -> onDialRequest?.invoke(msg.phone ?: "", msg.callSession ?: "")
                     }
                 } catch (e: Exception) {
                     logger.e("WSMgr", "parse error: ${e.message}")

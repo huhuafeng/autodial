@@ -37,7 +37,18 @@ class MainService : Service() {
         recordingMonitor = RecordingMonitor(this)
         uploadManager = UploadManager(this)
 
+        wsManager.agentId = config.agentId
+        wsManager.token = config.token
         uploadManager.uploadUrl = config.uploadUrl
+
+        wsManager.onAuthState = { ok, msg ->
+            logger.i("MainSvc", "auth ${if (ok) "ok" else "failed"}: $msg")
+            if (!ok) {
+                // auth failed, force re-login
+                config.clearLogin()
+                android.os.Process.killProcess(android.os.Process.myPid())
+            }
+        }
 
         wsManager.onDialRequest = { phone, callSession ->
             logger.i("MainSvc", "dial request phone=$phone session=$callSession")

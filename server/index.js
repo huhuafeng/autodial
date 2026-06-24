@@ -52,6 +52,33 @@ function todayTs() {
   const d = new Date(); d.setHours(0,0,0,0); return d.getTime()
 }
 
+// ───── Agents & Auth ─────
+
+const agents = [
+  { agentId: 'agent01', name: '坐席01', password: '123456' },
+  { agentId: 'agent02', name: '坐席02', password: '123456' },
+  { agentId: 'agent03', name: '坐席03', password: '123456' },
+]
+
+// 坐席登录
+app.post('/api/login', (req, res) => {
+  const { agentId, password } = req.body || {}
+  const agent = agents.find(a => a.agentId === agentId && a.password === password)
+  if (!agent) return res.status(401).json({ error: '账号或密码错误' })
+  const token = crypto.randomBytes(16).toString('hex')
+  agents.find(a => a.agentId === agentId)._token = token
+  res.json({ success: true, agentId: agent.agentId, name: agent.name, token })
+})
+
+// 坐席列表（含在线状态）
+app.get('/api/agents', (req, res) => {
+  res.json(agents.map(a => ({
+    agentId: a.agentId,
+    name: a.name,
+    online: !!phones[a.agentId],
+  })))
+})
+
 // ───── API ─────
 
 // 今日/昨日统计
@@ -126,7 +153,9 @@ app.use('/uploads', express.static(UPLOAD_DIR))
 const server = http.createServer(app)
 const wss = new WebSocket.Server({ server })
 
-const clients = { web: null, phone: null }
+let webWs = null
+const phones = {}  // { agentId: ws }
+const agentTokens = {} // { agentId: token }
 const PING_INTERVAL = 30000
 const PONG_TIMEOUT = 10000
 
@@ -139,6 +168,15 @@ function send(ws, data) {
   if (ws && ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(data))
   }
+}
+
+function broadcastAgents() {
+  if (!webWs) return
+  const list = agents.map(a => ({
+    agentId: a.agentId, name: a.name,
+    online: !!phones[a.agentId],
+  }))
+  send(webWs, { type: 'agent_list', agents: list })
 }
 
 function heartbeat(ws) {
@@ -154,6 +192,7 @@ function heartbeat(ws) {
 wss.on('connection', (ws, req) => {
   const addr = req.socket.remoteAddress
   let role = null
+  let currentAgentId = null
 
   ws.isAlive = true
   ws.on('pong', () => {
@@ -170,46 +209,67 @@ wss.on('connection', (ws, req) => {
     if (msg.type === 'register') {
       role = msg.role
       if (role === 'web') {
-        clients.web = ws
+        webWs = ws
         log('SYS', 'web client registered')
         send(ws, { type: 'registered', role: 'web' })
+        broadcastAgents()
       } else if (role === 'phone') {
-        clients.phone = ws
-        log('SYS', 'phone client registered')
         send(ws, { type: 'registered', role: 'phone' })
       }
       return
     }
 
+    // 手机端认证
+    if (msg.type === 'auth') {
+      const agent = agents.find(a => a.agentId === msg.agentId && a._token === msg.token)
+      if (!agent) {
+        send(ws, { type: 'auth_error', message: '认证失败' })
+        return
+      }
+      currentAgentId = msg.agentId
+      phones[msg.agentId] = ws
+      log('SYS', `phone agent ${msg.agentId} authenticated`)
+      send(ws, { type: 'auth_ok', agentId: msg.agentId })
+      broadcastAgents()
+      return
+    }
+
     if (msg.type === 'pong') return
 
+    // PC 拨号（按坐席路由）
     if (msg.type === 'dial') {
-      log('WEB', `dial request: ${msg.phone}`)
-      if (clients.phone) {
-        send(clients.phone, msg)
+      const target = msg.agentId
+      log('WEB', `dial request agent=${target} phone=${msg.phone}`)
+      if (target && phones[target]) {
+        send(phones[target], msg)
       } else {
-        send(ws, { type: 'error', message: 'phone not connected' })
+        send(ws, { type: 'error', message: `坐席 ${target} 不在线` })
       }
       return
     }
 
+    // 手机状态上报
     if (msg.type === 'status') {
-      log('PHONE', `status: ${msg.status} phone=${msg.phone}`)
-      if (clients.web) send(clients.web, msg)
+      log('PHONE', `[${currentAgentId || '?'}] status: ${msg.status} phone=${msg.phone}`)
+      if (webWs) send(webWs, msg)
       return
     }
 
     if (msg.type === 'record_ready') {
-      log('PHONE', `record ready: ${msg.callSession} ${msg.fileName}`)
-      if (clients.web) send(clients.web, msg)
+      log('PHONE', `[${currentAgentId || '?'}] record: ${msg.callSession}`)
+      if (webWs) send(webWs, msg)
       return
     }
   })
 
   ws.on('close', () => {
     log('SYS', `${role || 'unknown'} disconnected`)
-    if (role === 'web') clients.web = null
-    else if (role === 'phone') clients.phone = null
+    if (role === 'web') {
+      webWs = null
+    } else if (currentAgentId) {
+      delete phones[currentAgentId]
+      broadcastAgents()
+    }
   })
 
   ws.on('error', () => {})

@@ -29,12 +29,37 @@ class ConfigManager(context: Context) {
         get() = sp.getString(KEY_SUFFIX, DEFAULT_SUFFIX) ?: DEFAULT_SUFFIX
         set(v) = sp.edit().putString(KEY_SUFFIX, v).apply()
 
+    var agentId: String
+        get() = sp.getString(KEY_AGENT_ID, "") ?: ""
+        set(v) = sp.edit().putString(KEY_AGENT_ID, v).apply()
+
+    var token: String
+        get() = sp.getString(KEY_TOKEN, "") ?: ""
+        set(v) = sp.edit().putString(KEY_TOKEN, v).apply()
+
+    var agentName: String
+        get() = sp.getString(KEY_AGENT_NAME, "") ?: ""
+        set(v) = sp.edit().putString(KEY_AGENT_NAME, v).apply()
+
+    fun isLoggedIn(): Boolean = agentId.isNotEmpty() && token.isNotEmpty()
+
+    fun clearLogin() {
+        sp.edit()
+            .putString(KEY_AGENT_ID, "")
+            .putString(KEY_TOKEN, "")
+            .putString(KEY_AGENT_NAME, "")
+            .apply()
+    }
+
     companion object {
         private const val KEY_WS_URL = "ws_url"
         private const val KEY_UPLOAD_URL = "upload_url"
         private const val KEY_CALL_REC_PATH = "call_rec_path"
         private const val KEY_KEYWORD = "keyword"
         private const val KEY_SUFFIX = "suffix"
+        private const val KEY_AGENT_ID = "agent_id"
+        private const val KEY_TOKEN = "token"
+        private const val KEY_AGENT_NAME = "agent_name"
 
         const val DEFAULT_CALL_REC_PATH = "/storage/emulated/0/MIUI/sound_recorder/call_rec"
         const val DEFAULT_KEYWORD = "mobile_time"

@@ -47,6 +47,13 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif; 
     <span class="role-badge" id="roleBadge">WEB</span>
   </div>
 
+  <div class="agent-area" style="margin-bottom:16px;">
+    <label style="font-size:14px;color:#333;font-weight:500;display:block;margin-bottom:8px;">👤 选择坐席</label>
+    <div id="agentList" style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="padding:10px 16px;background:#f5f5f5;border-radius:8px;font-size:13px;color:#999;">加载中...</div>
+    </div>
+  </div>
+
   <div class="input-area">
     <label>📞 电话号码</label>
     <div class="input-row">
@@ -79,6 +86,8 @@ const dialBtn = $('dialBtn')
 const statusCard = $('statusCard')
 const logList = $('logList')
 
+let selectedAgent = null
+
 function addLog(msg) {
   const ts = new Date().toLocaleTimeString()
   const el = document.createElement('div')
@@ -90,7 +99,28 @@ function addLog(msg) {
 function setOnline(on) {
   dot.className = `dot ${on ? 'online' : 'offline'}`
   label.textContent = on ? '已连接' : '未连接'
-  dialBtn.disabled = !on
+  updateDialBtn()
+}
+
+function updateDialBtn() {
+  dialBtn.disabled = !ws || !selectedAgent
+}
+
+function renderAgents(agents) {
+  const el = document.getElementById('agentList')
+  el.innerHTML = agents.map(a => {
+    const sel = selectedAgent === a.agentId
+    const status = a.online ? '🟢' : '⚪'
+    return `<div class="agent-btn ${sel ? 'selected' : ''}" data-id="${a.agentId}" style="cursor:pointer;padding:10px 16px;border-radius:8px;font-size:13px;${sel ? 'background:#0090ff;color:#fff' : 'background:#f5f5f5;color:#333'}">${status} ${a.name}</div>`
+  }).join('')
+  el.querySelectorAll('.agent-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedAgent = btn.dataset.id
+      renderAgents(agents)
+      addLog(`选择坐席: ${agents.find(a => a.agentId === selectedAgent)?.name}`)
+      updateDialBtn()
+    })
+  })
 }
 
 function setStatus(data) {
@@ -138,6 +168,12 @@ function connect() {
       return
     }
 
+    if (data.type === 'agent_list') {
+      renderAgents(data.agents)
+      addLog(`坐席列表已更新 (${data.agents.filter(a => a.online).length} 在线)`)
+      return
+    }
+
     if (data.type === 'status') {
       setStatus(data)
       return
@@ -176,10 +212,11 @@ dialBtn.addEventListener('click', () => {
   const phone = phoneInput.value.trim()
   if (!phone) { addLog('⚠️ 请输入号码'); return }
   if (!/^[\d*#+\-]+$/.test(phone)) { addLog('⚠️ 号码格式不正确'); return }
+  if (!selectedAgent) { addLog('⚠️ 请先选择坐席'); return }
   const callSession = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
-  const msg = { type: 'dial', phone, callSession }
+  const msg = { type: 'dial', agentId: selectedAgent, phone, callSession }
   ws.send(JSON.stringify(msg))
-  addLog(`📞 发送拨号: ${phone}`)
+  addLog(`📞 [${selectedAgent}] 发送拨号: ${phone}`)
   statusCard.innerHTML = `
     <div class="status-item"><span class="label">状态</span><span class="value calling">📤 已发送拨号指令</span></div>
     <div class="status-item"><span class="label">号码</span><span class="value">${phone}</span></div>
