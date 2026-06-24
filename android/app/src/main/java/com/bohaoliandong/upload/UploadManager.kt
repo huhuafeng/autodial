@@ -3,6 +3,8 @@ package com.bohaoliandong.upload
 import android.content.Context
 import com.bohaoliandong.BuildConfig
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -24,9 +26,12 @@ class UploadManager(private val context: Context) {
             return
         }
 
+        val mime = "audio/mpeg".toMediaType()
+        val fileBody = file.toRequestBody(mime)
+
         val body = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
-            .addFormDataPart("file", file.name, RequestBody.create(MediaType.parse("audio/mpeg"), file))
+            .addFormDataPart("file", file.name, fileBody)
             .addFormDataPart("callSession", callSession)
             .build()
 
@@ -38,7 +43,8 @@ class UploadManager(private val context: Context) {
         client.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call, response: Response) {
                 val ok = response.isSuccessful
-                onResult(ok, if (ok) response.body()?.string() else response.message())
+                val msg = if (ok) response.body?.string() else response.message
+                onResult(ok, msg)
             }
 
             override fun onFailure(call: Call, e: IOException) {

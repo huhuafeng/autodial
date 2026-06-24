@@ -58,7 +58,7 @@ class MainService : Service() {
                     sendWsStatus("answered", phone)
                 }
                 TelephonyManager.CALL_STATE_IDLE -> {
-                    val session = callHandler.getCallSession() ?: return@onCallStateChanged
+                    val session = callHandler.getCallSession() ?: return
                     sendWsStatus("ended", phone)
                     recordingMonitor.waitForRecording(phone ?: "") { path ->
                         logger.i("MainSvc", "recording result: $path")
