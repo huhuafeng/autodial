@@ -7,5 +7,6 @@ data class WsMessage(
     val callSession: String? = null,
     val status: String? = null,
     val fileName: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    val agentId: String? = null
 )

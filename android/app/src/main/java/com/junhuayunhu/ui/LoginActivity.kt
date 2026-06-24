@@ -48,10 +48,10 @@ class LoginActivity : AppCompatActivity() {
                 runOnUiThread {
                     btnLogin.isEnabled = true
                     btnLogin.text = "登 录"
-                    if (result != null) {
+                    if (result != null && result.token != null) {
                         config.agentId = agentId
                         config.token = result.token
-                        config.agentName = result.name
+                        config.agentName = result.name ?: agentId
                         startActivity(Intent(this, MainActivity::class.java))
                         finish()
                     } else {

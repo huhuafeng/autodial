@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         // 未登录 → 跳转登录页
         if (!config.isLoggedIn()) {
-            startActivity(Intent(this, ui.LoginActivity::class.java))
+            startActivity(Intent(this, com.junhuayunhu.ui.LoginActivity::class.java))
             finish()
             return
         }
