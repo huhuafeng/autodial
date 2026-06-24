@@ -60,7 +60,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="30dp"
         android:background="#E8F4FF"
-        android:text="📊 统计 & 记录"
+        android:text="📊 统计 &amp; 记录"
         android:textColor="#0090FF"
         android:textSize="14sp"
         android:paddingHorizontal="24dp" />
